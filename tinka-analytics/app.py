@@ -16,12 +16,12 @@ st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Pyth
 st.sidebar.markdown("""
 ### Tinka Analytics
 **Version:** 1.0.0
-**Author:** Juan (Senior Data Scientist)
+**Author:** Juan (business intelligence analyst)
 **Stack:** Python, Streamlit, Pandas, NumPy, Scipy
 """)
 
 # Hero Section
-st.title("Tinka Analytics: Decidindo el Azar")
+st.title("Tinka Analytics: Decidiendo el Azar")
 st.markdown("""
 ### ¿Es posible ganar a la casa usando Matemáticas?
 Bienvenido. Esta aplicación no es un simple generador de números aleatorios. Es un demostrador de capacidad técnica que aplica **Inferencia Estadística**, **Cadenas de Markov** y **Simulación de Monte Carlo** para analizar el comportamiento histórico de la lotería peruana "La Tinka".

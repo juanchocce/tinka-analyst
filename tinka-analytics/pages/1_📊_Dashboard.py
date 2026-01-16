@@ -19,7 +19,7 @@ if df_draws.empty:
 st.title("📊 Panel de Control Estadístico")
 st.markdown("Análisis de la era moderna de La Tinka (Oct 2022 - Presente | 50 Bolillas)")
 
-# Top KPIs across columns
+# Top KPIs
 current_sorteo = df_draws['Sorteo'].max() if 'Sorteo' in df_draws.columns else 0
 col1, col2, col3, col4 = st.columns(4)
 
@@ -36,37 +36,91 @@ with col4:
 
 st.markdown("---")
 
-# SECTION 1: PRESION ESTADISTICA (GAP ANALYSIS)
-st.subheader("1. Mapa de Presión Estadística (Gap Analysis)")
-st.markdown("""
-Este gráfico compara el **Retraso Actual** (eje Y) contra el **Retraso Promedio Histórico** (eje X).
-* **Puntos Superiores (Z-Score Alto)**: Números que "deberían" salir pronto por reversión a la media.
-* **Puntos Inferiores**: Números que han salido recientemente ("fríos").
-""")
+# SECTION 1: Time Series & Entropy Stability
+st.subheader("1. Estabilidad del Sistema (Entropía Temporal)")
+st.markdown("¿Está la máquina cambiando su comportamiento? Una entropía estable indica aleatoriedad pura. Caídas bruscas sugieren patrones temporales.")
 
-gaps_df = analysis.get_gap_metrics(df_exploded, current_sorteo)
+entropy_df = analysis.get_rolling_entropy(df_exploded, window=50)
+if not entropy_df.empty:
+    fig_ent = px.line(
+        entropy_df, 
+        x='End_Sorteo', 
+        y='Entropy',
+        title="Evolución de la Entropía (Ventana Móvil 50 Sorteos)",
+        labels={'End_Sorteo': 'Sorteo', 'Entropy': 'Entropía de Shannon'}
+    )
+    fig_ent.add_hline(y=3.91, line_dash="dash", annotation_text="Max Entropía (Azar Puro)")
+    fig_ent.update_layout(height=400)
+    st.plotly_chart(fig_ent, use_container_width=True)
+else:
+    st.info("Se necesitan más datos para calcular la entropía móvil.")
 
-fig_scatter = px.scatter(
-    gaps_df, 
-    x='Mean_Gap', 
-    y='Current_Gap', 
-    size='Z_Score', 
-    color='Z_Score',
-    text='Numero',
-    color_continuous_scale='RdYlGn_r', # Red = High Pressure (High Z)
-    title="Gap Map: ¿Qué números están 'retrasados'?",
-    labels={'Mean_Gap': 'Ciclo Medio de Aparición', 'Current_Gap': 'Sorteos de Ausencia Actual'}
-)
-fig_scatter.update_traces(textposition='top center')
-fig_scatter.update_layout(height=600)
-st.plotly_chart(fig_scatter, use_container_width=True)
+# SECTION 2: PRESION ESTADISTICA (GAP ANALYSIS) FIX
+st.subheader("2. Mapa de Presión Estadística (Gap Analysis)")
+col_gap_desc, col_gap_chart = st.columns([1, 3])
 
-# SECTION 2: HEATMAP DE CO-OCURRENCIA
-st.subheader("2. Matriz de Co-ocurrencia")
-st.markdown("Identifica parejas de números que tienden a salir juntos más allá del azar.")
+with col_gap_desc:
+    st.markdown("""
+    **Interpretación:**
+    Este mapa busca anomalías.
+    
+    * **Eje X (Media)**: Frecuencia habitual.
+    * **Eje Y (Lag Actual)**: Cuánto tiempo lleva sin salir.
+    * **Burbuja Roja Grande**: Número con alto Z-Score (Estadísticamente "atrasado" y presionado a salir por reversión a la media).
+    """)
 
+with col_gap_chart:
+    gaps_df = analysis.get_gap_metrics(df_exploded, current_sorteo)
+    
+    # Use 'Plot_Size' which guarantees positive values for bubble size
+    fig_scatter = px.scatter(
+        gaps_df, 
+        x='Mean_Gap', 
+        y='Current_Gap', 
+        size='Plot_Size', # FIXED: Normalized column
+        color='Z_Score',
+        text='Numero',
+        color_continuous_scale='RdYlGn_r', # Red = High Pressure
+        title="Gap Map: Detección de Anomalías",
+        hover_data=['Z_Score', 'Current_Gap', 'Mean_Gap']
+    )
+    fig_scatter.update_traces(textposition='top center')
+    fig_scatter.update_layout(height=500)
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
+# SECTION 3: PARITY & MARKOV
+st.markdown("---")
+col_parity, col_markov = st.columns(2)
+
+with col_parity:
+    st.subheader("3. Distribución de Paridad")
+    parity_dist = analysis.get_parity_analysis(df_draws)
+    fig_par = px.bar(
+        x=parity_dist.index, 
+        y=parity_dist.values,
+        title="Frecuencia de Pares/Impares (%)",
+        labels={'x': 'Combinación', 'y': 'Porcentaje'},
+        color=parity_dist.values,
+        color_continuous_scale='Blues'
+    )
+    st.plotly_chart(fig_par, use_container_width=True)
+
+with col_markov:
+    st.subheader("4. Cadenas de Markov (Suma)")
+    markov = analysis.get_markov_matrix(df_draws)
+    fig_mk = px.imshow(
+        markov,
+        text_auto=".1%",
+        color_continuous_scale="Greens",
+        title="Probabilidad de Transición de Estado (Suma)",
+        labels={'x': 'El_siguiente_sorteo_será...', 'y': 'Si_el_sorteo_anterior_fue...'},
+        aspect="auto"
+    )
+    st.plotly_chart(fig_mk, use_container_width=True)
+
+# SECTION 4: CO-OCURRENCIA
+st.subheader("5. Redes de Co-ocurrencia")
 matrix = analysis.get_cooccurrence_matrix(df_draws)
-# Mask diagonal for better visualization
 import numpy as np
 np.fill_diagonal(matrix.values, 0)
 
@@ -74,33 +128,7 @@ fig_heat = px.imshow(
     matrix,
     labels=dict(x="Bolilla A", y="Bolilla B", color="Frecuencia"),
     color_continuous_scale='Viridis',
-    title="Heatmap de Relaciones entre Bolillas"
+    title="Heatmap: ¿Qué números salen juntos?"
 )
-fig_heat.update_layout(height=700)
+fig_heat.update_layout(height=600)
 st.plotly_chart(fig_heat, use_container_width=True)
-
-# SECTION 3: MARKOV CHAINS
-st.subheader("3. Transición de Estados (Suma de Bolillas)")
-st.markdown("Probabilidad de que el siguiente sorteo tenga una Suma Alta/Baja basado en el sorteo anterior.")
-
-col_glass, col_trans = st.columns([1, 2])
-
-with col_glass:
-    st.info("""
-    **Estados Definidos:**
-    * **Bajo**: Suma < 130
-    * **Medio**: 130 <= Suma < 170
-    * **Alto**: Suma >= 170
-    
-    *La Tinka busca el equilibrio (Campana de Gauss).*
-    """)
-
-with col_trans:
-    markov = analysis.get_markov_matrix(df_draws)
-    fig_mk = px.imshow(
-        markov,
-        text_auto=".1%",
-        color_continuous_scale="Blues",
-        title="Matriz de Probabilidad de Transición"
-    )
-    st.plotly_chart(fig_mk, use_container_width=True)
