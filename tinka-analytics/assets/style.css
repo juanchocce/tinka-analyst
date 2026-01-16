@@ -1,0 +1,48 @@
+/* Main Background */
+.stApp {
+  /* Optional gradient or clean background */
+}
+
+/* Metric Cards */
+div[data-testid="stMetric"] {
+  background-color: #262730;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #444;
+}
+
+/* Heatmap Containers */
+.plotly-graph-div {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* Titles */
+h1,
+h2,
+h3 {
+  font-family: "Helvetica Neue", sans-serif;
+  font-weight: 700;
+}
+
+h1 {
+  color: #ffcc00 !important; /* Tinka Gold */
+  text-shadow: 0px 0px 10px rgba(255, 204, 0, 0.3);
+}
+
+/* Buttons */
+.stButton > button {
+  background-color: #ffcc00;
+  color: #000;
+  font-weight: bold;
+  border-radius: 20px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+  background-color: #ffd700;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+}
