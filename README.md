@@ -94,7 +94,7 @@ python tinka_analysis.py
 
 ## 🙋‍♂️ Autor
 
-**Juan Miguel Chocce Puma**
+**Juan Chocce**
 
 * *Systems Engineer & Data Science Enthusiast* 🚀
 * [LinkedIn](https://www.linkedin.com/in/juanchocce/) | [Portfolio Website](https://juanchocce.github.io/)
