@@ -2,7 +2,7 @@
 
 # 📊 Tinka-Analytics: Decoding Stochastic Patterns 🎰
 
-<img width="1366" height="768" alt="1" src="https://github.com/user-attachments/assets/6eaed7f1-1271-4854-9503-2b944ea9091e" />
+---
 
 ## 📋 Descripción del Proyecto
 
@@ -12,6 +12,9 @@ Este proyecto realiza un **Análisis Exploratorio de Datos (EDA)** y un estudio 
 
 ---
 
+<img width="1366" height="768" alt="1" src="https://github.com/user-attachments/assets/6eaed7f1-1271-4854-9503-2b944ea9091e" />
+
+---
 ## 🚀 Características Principales
 
 ### 1. 🔍 Análisis de Gaps (Latencia)
