@@ -76,7 +76,7 @@ El script genera automáticamente:
 
 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tu-usuario/tinka-analytics.git
+git clone https://github.com/juanchocce/Tinka-Analytics-Decoding-Patterns.git
 
 ```
 
